@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
 const dispatches = [
   {
     n: "01",
+    slug: "big-brother-recommends",
     title: "Алгоритм решает, что вы прочтёте дальше",
     excerpt:
       "Лента — не зеркало мира, а его коммерческая интерпретация. Свобода начинается там, где вы выбираете не следующий клик, а следующий вопрос.",
@@ -31,6 +32,7 @@ const dispatches = [
   },
   {
     n: "02",
+    slug: "ready-made-answer",
     title: "Готовый ответ дешевле собственного",
     excerpt:
       "Чем больше доступной информации, тем реже мы думаем сами. Цена удобства — атрофия суждения. Кант называл это несовершеннолетием — и считал виной самого человека.",
@@ -38,6 +40,7 @@ const dispatches = [
   },
   {
     n: "03",
+    slug: "berdyaev-groundless-freedom",
     title: "Платформа растёт за ваш счёт — и вашими руками",
     excerpt:
       "Сначала вас привлекают. Потом продают вам мир, выгодный платформе. Бердяев писал: дух свободен только тогда, когда не служит чужой необходимости.",
@@ -137,22 +140,24 @@ function Index() {
 
           <div className="mt-12 grid gap-px bg-border md:grid-cols-3">
             {dispatches.map((d) => (
-              <article
+              <Link
                 key={d.n}
-                className="group relative bg-background p-8 transition hover:bg-card md:p-10"
+                to="/essays/$slug"
+                params={{ slug: d.slug }}
+                className="group relative block bg-background p-8 transition hover:bg-card md:p-10"
               >
                 <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                   <span>dispatch {d.n}</span>
                   <span className="text-ember">{d.tag}</span>
                 </div>
-                <h3 className="mt-8 font-mono text-2xl font-bold leading-tight text-foreground">
+                <h3 className="mt-8 font-mono text-2xl font-bold leading-tight text-foreground transition group-hover:text-ember">
                   {d.title}
                 </h3>
                 <p className="mt-5 font-sans text-sm leading-relaxed text-muted-foreground">
                   {d.excerpt}
                 </p>
                 <div className="mt-8 h-px w-12 bg-ember transition-all group-hover:w-full" />
-              </article>
+              </Link>
             ))}
           </div>
         </div>
@@ -164,8 +169,14 @@ function Index() {
           <div className="md:col-span-5">
             <SectionLabel index="§ 02">передовица</SectionLabel>
             <h2 className="mt-10 font-mono text-4xl font-bold leading-tight text-foreground md:text-5xl">
-              Большой Брат больше не смотрит. Он{" "}
-              <span className="ember-text">рекомендует</span>.
+              <Link
+                to="/essays/$slug"
+                params={{ slug: "big-brother-recommends" }}
+                className="transition hover:text-ember"
+              >
+                Большой Брат больше не смотрит. Он{" "}
+                <span className="ember-text">рекомендует</span>.
+              </Link>
             </h2>
             <p className="mt-8 font-sans text-base leading-relaxed text-foreground/80">
               Оруэлл представлял власть как сапог, наступающий на лицо
@@ -179,7 +190,8 @@ function Index() {
               чем заглушить.
             </p>
             <Link
-              to="/essays"
+              to="/essays/$slug"
+              params={{ slug: "big-brother-recommends" }}
               className="mt-10 inline-block border-b border-ember pb-1 font-mono text-xs uppercase tracking-widest text-ember"
             >
               читать целиком →
