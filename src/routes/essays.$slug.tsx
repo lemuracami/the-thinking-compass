@@ -133,7 +133,7 @@ function EssayPage() {
 
       {/* BODY */}
       <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
-        {essay.body.map((block, i) => (
+        {essay.body.map((block: EssayBlock, i: number) => (
           <Block key={i} block={block} />
         ))}
 
