@@ -14,7 +14,7 @@ import { Route as ResponsibilityRouteImport } from './routes/responsibility'
 import { Route as PracticesRouteImport } from './routes/practices'
 import { Route as EssaysRouteImport } from './routes/essays'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EssaysSlugRouteImport } from './routes/essays.$slug'
+import { Route as EssaysSlugRouteImport } from './routes/essays_.$slug'
 
 const ThinkersRoute = ThinkersRouteImport.update({
   id: '/thinkers',
@@ -42,14 +42,14 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const EssaysSlugRoute = EssaysSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => EssaysRoute,
+  id: '/essays_/$slug',
+  path: '/essays/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/essays': typeof EssaysRouteWithChildren
+  '/essays': typeof EssaysRoute
   '/practices': typeof PracticesRoute
   '/responsibility': typeof ResponsibilityRoute
   '/thinkers': typeof ThinkersRoute
@@ -57,7 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/essays': typeof EssaysRouteWithChildren
+  '/essays': typeof EssaysRoute
   '/practices': typeof PracticesRoute
   '/responsibility': typeof ResponsibilityRoute
   '/thinkers': typeof ThinkersRoute
@@ -66,11 +66,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/essays': typeof EssaysRouteWithChildren
+  '/essays': typeof EssaysRoute
   '/practices': typeof PracticesRoute
   '/responsibility': typeof ResponsibilityRoute
   '/thinkers': typeof ThinkersRoute
-  '/essays/$slug': typeof EssaysSlugRoute
+  '/essays_/$slug': typeof EssaysSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,15 +96,16 @@ export interface FileRouteTypes {
     | '/practices'
     | '/responsibility'
     | '/thinkers'
-    | '/essays/$slug'
+    | '/essays_/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EssaysRoute: typeof EssaysRouteWithChildren
+  EssaysRoute: typeof EssaysRoute
   PracticesRoute: typeof PracticesRoute
   ResponsibilityRoute: typeof ResponsibilityRoute
   ThinkersRoute: typeof ThinkersRoute
+  EssaysSlugRoute: typeof EssaysSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -144,34 +145,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/essays/$slug': {
-      id: '/essays/$slug'
-      path: '/$slug'
+    '/essays_/$slug': {
+      id: '/essays_/$slug'
+      path: '/essays/$slug'
       fullPath: '/essays/$slug'
       preLoaderRoute: typeof EssaysSlugRouteImport
-      parentRoute: typeof EssaysRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface EssaysRouteChildren {
-  EssaysSlugRoute: typeof EssaysSlugRoute
-}
-
-const EssaysRouteChildren: EssaysRouteChildren = {
-  EssaysSlugRoute: EssaysSlugRoute,
-}
-
-const EssaysRouteWithChildren =
-  EssaysRoute._addFileChildren(EssaysRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EssaysRoute: EssaysRouteWithChildren,
+  EssaysRoute: EssaysRoute,
   PracticesRoute: PracticesRoute,
   ResponsibilityRoute: ResponsibilityRoute,
   ThinkersRoute: ThinkersRoute,
+  EssaysSlugRoute: EssaysSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { essays, getEssay, type EssayBlock } from "@/data/essays";
 
-export const Route = createFileRoute("/essays/$slug")({
+export const Route = createFileRoute("/essays_/$slug")({
   loader: ({ params }) => {
     const essay = getEssay(params.slug);
     if (!essay) throw notFound();
