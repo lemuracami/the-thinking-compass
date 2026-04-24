@@ -1,0 +1,9 @@
+node_modules
+dist
+.output
+.git
+.vscode
+.workspace
+*.log
+.env*
+tsconfig.tsbuildinfo
