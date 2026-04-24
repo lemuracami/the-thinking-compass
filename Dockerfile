@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 #
 # Локальный контейнер для TanStack Start + Cloudflare Workers через wrangler.
-# Для продакшена по-прежнему используй `wrangler deploy`.
+# Для продакшена используй `wrangler deploy`.
 
 # ---- Этап 1: сборка ----
 FROM oven/bun:1 AS build
@@ -21,15 +21,17 @@ RUN bun run build
 RUN node -e "const fs=require('fs');const p='dist/server/wrangler.json';const c=JSON.parse(fs.readFileSync(p,'utf8'));delete c.configPath;delete c.userConfigPath;c.dev=Object.assign({},c.dev,{ip:'0.0.0.0'});fs.writeFileSync(p,JSON.stringify(c));"
 
 # ---- Этап 2: рантайм ----
-FROM oven/bun:1 AS runtime
+# Wrangler нужно запускать на Node, а не на Bun: у Bun есть известные проблемы
+# с wrangler/miniflare, особенно в контейнерных сценариях.
+FROM node:20-slim AS runtime
 WORKDIR /app
 
-# Ставим wrangler в образ заранее, чтобы рантайм не зависел от bunx и сети
-RUN bun add -g wrangler@4.85.0
-ENV PATH="/root/.bun/bin:${PATH}"
-ENV PORT=8787
-ENV CI=1
-ENV WRANGLER_SEND_METRICS=false
+ENV PORT=8787 \
+    CI=1 \
+    WRANGLER_SEND_METRICS=false \
+    npm_config_update_notifier=false
+
+RUN npm install -g wrangler@4.85.0
 
 COPY --from=build /app/dist ./dist
 
