@@ -7,22 +7,23 @@
 FROM oven/bun:1 AS build
 WORKDIR /app
 
-# Манифест и лок (звёздочка не падает, если файла нет)
 COPY package.json ./
 COPY bun.lockb* package-lock.json* ./
 RUN bun install
 
-# Исходники и сборка
 COPY . .
 ENV NODE_ENV=production
 RUN bun run build
+
+# Патчим сгенерированный wrangler.json: убираем dev.ip=localhost,
+# иначе wrangler внутри контейнера слушает только loopback
+# и снаружи запросы «висят» без ответа.
+RUN node -e "const f='dist/server/wrangler.json';const c=JSON.parse(require('fs').readFileSync(f,'utf8'));c.dev=Object.assign({},c.dev,{ip:'0.0.0.0'});require('fs').writeFileSync(f,JSON.stringify(c));"
 
 # ---- Этап 2: рантайм ----
 FROM oven/bun:1 AS runtime
 WORKDIR /app
 
-# Берём готовый бандл целиком: dist/server содержит сгенерированный
-# wrangler.json с корректным main: "index.js" и ссылкой на ../client.
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
@@ -32,6 +33,4 @@ EXPOSE 8787
 
 WORKDIR /app/dist/server
 
-# Запускаем wrangler из dist/server, чтобы он подхватил сгенерированный
-# wrangler.json (там main=index.js — реальный собранный воркер).
 CMD ["bunx", "wrangler", "dev", "--config", "wrangler.json", "--ip", "0.0.0.0", "--port", "8787"]
